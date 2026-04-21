@@ -21,6 +21,10 @@ from groq import Groq
 from config import DATABASE_URL, GROQ_API_KEY
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"message": "TECH-TALK-AI Backend API is fully operational and awaiting frontend requests."}
+
 # ---------------- CORS ----------------
 # Hardened for Production
 app.add_middleware(
