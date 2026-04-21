@@ -54,36 +54,39 @@ class GoogleUser(BaseModel):
 
 # ---------------- CREATE TABLE ----------------
 def create_table():
-    conn = get_connection()
-    cur = conn.cursor()
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name TEXT,
-        email TEXT UNIQUE,
-        password TEXT
-    )
-    """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            email TEXT UNIQUE,
+            password TEXT
+        )
+        """)
 
-    cur.execute("""
-    ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE,
-        ADD COLUMN IF NOT EXISTS token TEXT,
-        ADD COLUMN IF NOT EXISTS roll_number TEXT,
-        ADD COLUMN IF NOT EXISTS branch_name TEXT,
-        ADD COLUMN IF NOT EXISTS academic_year TEXT,
-        ADD COLUMN IF NOT EXISTS interested_subjects TEXT,
-        ADD COLUMN IF NOT EXISTS domain TEXT,
-        ADD COLUMN IF NOT EXISTS latest_score INTEGER DEFAULT 0,
-        ADD COLUMN IF NOT EXISTS improvement_feedback TEXT DEFAULT '';
-    """)
+        cur.execute("""
+        ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE,
+            ADD COLUMN IF NOT EXISTS token TEXT,
+            ADD COLUMN IF NOT EXISTS roll_number TEXT,
+            ADD COLUMN IF NOT EXISTS branch_name TEXT,
+            ADD COLUMN IF NOT EXISTS academic_year TEXT,
+            ADD COLUMN IF NOT EXISTS interested_subjects TEXT,
+            ADD COLUMN IF NOT EXISTS domain TEXT,
+            ADD COLUMN IF NOT EXISTS latest_score INTEGER DEFAULT 0,
+            ADD COLUMN IF NOT EXISTS improvement_feedback TEXT DEFAULT '';
+        """)
 
-    cur.execute("UPDATE users SET is_verified = FALSE;")
+        cur.execute("UPDATE users SET is_verified = FALSE;")
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Warning: PostgreSQL database not connected yet! Please set DATABASE_URL in Render. Error: {e}")
 
 create_table()
 
