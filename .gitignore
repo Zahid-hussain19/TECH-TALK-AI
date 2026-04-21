@@ -1,0 +1,32 @@
+﻿# Environment files - NEVER commit these
+.env
+.env.local
+.env.*.local
+frontend/src/.env
+backend/ai_engine/.env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pdb
+*.db
+uploads/
+venv/
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+frontend/build/
+frontend/.env
+
+# Database & sensitive files
+*.db
+users.json
+emails_sent.txt
+
+# OS
+.DS_Store
+Thumbs.db
