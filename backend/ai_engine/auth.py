@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from flask import app
-from flask import app
 from pydantic import BaseModel, EmailStr
 import hashlib
 import uuid

@@ -6,7 +6,6 @@ import psycopg2
 import shutil
 import os
 from groq import Groq
-import fitz
 import smtplib
 from email.mime.text import MIMEText
 import uuid
