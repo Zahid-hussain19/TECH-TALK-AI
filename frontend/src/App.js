@@ -7,6 +7,7 @@ import Welcome from "./pages/Welcome";
 import Login from "./pages/auth/Login";
 import GuestSetup from "./pages/auth/GuestSetup";
 import Signup from "./pages/auth/Signup";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import Dashboard from "./pages/Dashboard";
 import Disclaimer from "./pages/Disclaimer";
 import Interview from "./pages/InterviewRoom";
@@ -107,7 +108,7 @@ function AppWrapper() {
   return (
     <>
       {/* 🔥 ONLY CHANGE: CONDITIONAL NAVBAR */}
-      {!["/login", "/signup", "/dashboard", "/interview", "/disclaimer", "/guest-setup"].includes(location.pathname) && (
+      {!["/login", "/signup", "/verify-email", "/dashboard", "/interview", "/disclaimer", "/guest-setup"].includes(location.pathname) && (
           <Navbar toggleTheme={toggleTheme} theme={theme} />
       )}
 
@@ -117,6 +118,7 @@ function AppWrapper() {
         <Route path="/guest-setup" element={<GuestSetup />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/disclaimer" element={<Disclaimer />} />
         <Route path="/interview" element={<Interview />} />

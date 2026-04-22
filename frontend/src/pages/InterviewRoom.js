@@ -21,6 +21,9 @@ const InterviewRoom = () => {
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   
+  const [aiSubtitle, setAiSubtitle] = useState("");
+  const [userSubtitle, setUserSubtitle] = useState("");
+  
   const [silenceEvents, setSilenceEvents] = useState(0);
   const [skipCount, setSkipCount] = useState(0);
   const [isDifficultyAdjusting, setIsDifficultyAdjusting] = useState(false);
@@ -256,6 +259,7 @@ const InterviewRoom = () => {
   ------------------------- */
   const speak = (text, onEndCallback = null) => {
     setIsAiSpeaking(true);
+    setAiSubtitle(text);
     window.speechSynthesis.cancel(); // Cancel any ongoing speech immediately
 
     const speech = new SpeechSynthesisUtterance(text);
@@ -263,10 +267,12 @@ const InterviewRoom = () => {
     speech.pitch = 1;
     speech.onend = () => {
       setIsAiSpeaking(false);
+      setAiSubtitle("");
       if (onEndCallback) onEndCallback();
     };
     speech.onerror = () => {
       setIsAiSpeaking(false);
+      setAiSubtitle("");
       if (onEndCallback) onEndCallback();
     };
 
@@ -362,13 +368,29 @@ const InterviewRoom = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.lang = "en-US";
 
     recognition.onresult = (event) => {
       if (!micOnRef.current) return;
+
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      setUserSubtitle(interimTranscript || finalTranscript);
+
+      if (!finalTranscript) return;
+
       clearTimeout(silenceTimer.current);
-      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+      const transcript = finalTranscript.toLowerCase().trim();
       console.log("User said:", transcript);
 
       // READY CHECK PHASE
@@ -527,7 +549,10 @@ const InterviewRoom = () => {
     };
 
     recognition.onspeechstart = () => setIsUserSpeaking(true);
-    recognition.onspeechend = () => setIsUserSpeaking(false);
+    recognition.onspeechend = () => {
+       setIsUserSpeaking(false);
+       setTimeout(() => setUserSubtitle(""), 2000); // Clear subtitle after 2 seconds of silence
+    };
 
     recognition.start();
     recognitionRef.current = recognition;
@@ -672,10 +697,24 @@ const InterviewRoom = () => {
         </div>
 
         {/* QUESTION BELOW STAGE */}
-        <div className="question-section-bottom" style={{ textAlign: "center", width: "100%", padding: "0 20px" }}>
-          <h2 className="question-text" style={{ fontSize: "24px", color: "#f8fafc", lineHeight: "1.6", fontWeight: 500 }}>
+        <div className="question-section-bottom" style={{ textAlign: "center", width: "100%", padding: "0 20px", position: "relative", zIndex: 50 }}>
+          <h2 className="question-text" style={{ fontSize: "24px", color: "#f8fafc", lineHeight: "1.6", fontWeight: 500, marginBottom: "15px" }}>
             {currentQuestion}
           </h2>
+
+          {/* CINEMATIC LIVE CAPTIONS */}
+          <div style={{ height: "60px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            {aiSubtitle && (
+              <div className="subtitle-box ai-subtitle" style={{ background: "rgba(0, 200, 255, 0.1)", border: "1px solid rgba(0, 200, 255, 0.3)", padding: "10px 20px", borderRadius: "8px", color: "#00c8ff", fontSize: "18px", fontStyle: "italic", maxWidth: "80%", boxShadow: "0 0 20px rgba(0, 200, 255, 0.2)" }}>
+                AI: {aiSubtitle}
+              </div>
+            )}
+            {!aiSubtitle && userSubtitle && (
+              <div className="subtitle-box user-subtitle" style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "10px 20px", borderRadius: "8px", color: "#10b981", fontSize: "18px", maxWidth: "80%", boxShadow: "0 0 20px rgba(16, 185, 129, 0.2)" }}>
+                You: {userSubtitle}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* INLINE CONTROL PILL */}

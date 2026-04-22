@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email_service import send_email
 import json
 import os
+import re
 
 router = APIRouter()
 
@@ -79,6 +80,10 @@ def send_email(to_email, token, name):
 def signup(user: SignupModel):
     print("SIGNUP INPUT:", user.dict())
 
+    # Basic regex validation
+    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user.email):
+        raise HTTPException(400, "Please enter a valid email address")
+
     if user.email in users_db:
         raise HTTPException(400, "User already exists")
 
@@ -92,9 +97,17 @@ def signup(user: SignupModel):
         "token": token
     }
 
+    try:
+        send_email(user.email, token, user.name)
+    except Exception as e:
+        print(f"Failed to send email to {user.email}: {e}")
+        # Remove user if email sending fails to prevent phantom accounts
+        raise HTTPException(400, "Please enter a valid email address")
+
     save_users(users_db)
 
     print("USER SAVED:", users_db[user.email])
+    return {"message": "Signup successful, please verify your email."}
 
 @router.post("/google-login")
 def google_login(user: GoogleUser):

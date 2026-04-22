@@ -1,45 +1,48 @@
-import {useRef,useEffect} from "react"
+import React, { useRef, useEffect } from "react";
 
-export default function VoiceRing(){
+export default function VoiceRing() {
+  const ringRef = useRef(null);
 
-const ringRef = useRef()
+  useEffect(() => {
+    let animationId;
+    let audioCtx;
+    let sourceNode;
 
-useEffect(()=>{
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        const analyser = audioCtx.createAnalyser();
+        sourceNode = audioCtx.createMediaStreamSource(stream);
+        sourceNode.connect(analyser);
 
-navigator.mediaDevices.getUserMedia({audio:true})
-.then(stream=>{
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-const ctx = new AudioContext()
+        function animate() {
+          analyser.getByteFrequencyData(dataArray);
+          const sum = dataArray.reduce((a, b) => a + b, 0);
+          const volume = dataArray.length > 0 ? sum / dataArray.length : 0;
 
-const analyser = ctx.createAnalyser()
+          if (ringRef.current) {
+            ringRef.current.style.transform = `scale(${1 + volume / 300})`;
+          }
 
-const source = ctx.createMediaStreamSource(stream)
+          animationId = requestAnimationFrame(animate);
+        }
 
-source.connect(analyser)
+        animate();
+      })
+      .catch((err) => {
+        console.error("Microphone error:", err);
+      });
 
-const dataArray = new Uint8Array(analyser.frequencyBinCount)
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId);
+      if (audioCtx && audioCtx.state !== "closed") {
+        audioCtx.close();
+      }
+    };
+  }, []);
 
-function animate(){
-
-analyser.getByteFrequencyData(dataArray)
-
-const volume = dataArray.reduce((a,b)=>a+b)/dataArray.length
-
-ringRef.current.style.transform =
-`scale(${1 + volume/300})`
-
-requestAnimationFrame(animate)
-
-}
-
-animate()
-
-})
-
-},[])
-
-return(
-<div className="voice-ring" ref={ringRef}></div>
-)
-
+  return <div className="voice-ring" ref={ringRef}></div>;
 }

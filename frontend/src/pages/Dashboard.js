@@ -33,6 +33,12 @@ const Dashboard = () => {
   const [isProfileSaved, setIsProfileSaved] = useState(false);
 
   useEffect(() => {
+    // Inject html2pdf for professional report export
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    script.async = true;
+    document.body.appendChild(script);
+
     const userStorage = JSON.parse(localStorage.getItem("user"));
     if (!userStorage) {
       navigate("/login");
@@ -129,14 +135,41 @@ const Dashboard = () => {
     }
   };
 
+  const handleDownloadReport = () => {
+    if (!window.html2pdf) {
+      alert("PDF engine is still loading. Please wait a moment.");
+      return;
+    }
+    
+    const element = document.getElementById('dashboard-content');
+    const rightPanel = document.getElementById('config-panel');
+    const topBar = document.getElementById('dashboard-topbar');
+    
+    if(rightPanel) rightPanel.style.display = 'none';
+    if(topBar) topBar.style.display = 'none';
+
+    const opt = {
+      margin:       0.3,
+      filename:     `${profile.name || "Candidate"}_TechTalkAI_Report.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#040814" },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+    };
+
+    window.html2pdf().set(opt).from(element).save().then(() => {
+      if(rightPanel) rightPanel.style.display = 'block';
+      if(topBar) topBar.style.display = 'flex';
+    });
+  };
+
   // Circular Gauge Calculations
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const scoreOffset = circumference - (profile.latest_score / 100) * circumference;
 
   return (
-    <div className="noc-body" style={{height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
-      <div className="noc-topbar" style={{background: 'rgba(4, 8, 20, 0.9)', backdropFilter: 'blur(12px)', position: 'relative', zIndex: 9999}}>
+    <div id="dashboard-content" className="noc-body" style={{height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
+      <div id="dashboard-topbar" className="noc-topbar" style={{background: 'rgba(4, 8, 20, 0.9)', backdropFilter: 'blur(12px)', position: 'relative', zIndex: 9999}}>
         <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00c8ff" strokeWidth="2"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h10"/><path d="M9 18l3-3-3-3"/></svg>
           <span style={{color: '#fff', fontWeight: 'bold', fontSize: '18px', letterSpacing: '1px'}}>Student Dashboard</span>
@@ -228,6 +261,11 @@ const Dashboard = () => {
               {profile.improvement_feedback || "Complete an interview to receive personalized feedback."}
             </p>
           </div>
+
+          <button onClick={handleDownloadReport} className="primary-btn glow-btn" style={{marginTop: "25px", width: "100%", padding: "12px", fontSize: "14px", background: "rgba(0, 200, 255, 0.1)", border: "1px solid #00c8ff", color: "#00c8ff"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: "8px", verticalAlign: "middle"}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Official Report (PDF)
+          </button>
         </div>
 
         {/* --------- MIDDLE PANEL: DENSE ANALYTICS --------- */}
@@ -291,7 +329,7 @@ const Dashboard = () => {
         </div>
 
         {/* --------- RIGHT PANEL: CONFIG & DEPLOY --------- */}
-        <div className="noc-panel animate-slide-up delay-300">
+        <div id="config-panel" className="noc-panel animate-slide-up delay-300">
           <h2 className="noc-header">Academic Profile</h2>
           
           <form onSubmit={handleProfileUpdate}>

@@ -32,13 +32,18 @@ const Signup = () => {
         return;
       }
 
-      const userData = { email, isAuthenticated: true };
-      localStorage.setItem("user", JSON.stringify(userData));
-      navigate("/dashboard");
+      setIsSubmitted(true);
+      const synth = window.speechSynthesis;
+      const utterThis = new SpeechSynthesisUtterance("Please verify your email");
+      synth.speak(utterThis);
 
     } catch (err) {
       console.error(err);
-      alert("Signup failed ❌");
+      if (err.response && err.response.data && err.response.data.detail) {
+        alert(err.response.data.detail);
+      } else {
+        alert("Signup failed ❌");
+      }
     } finally {
       setIsSubmitting(false);
     }
