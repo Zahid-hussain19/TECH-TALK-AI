@@ -10,7 +10,9 @@ PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 def send_email(to_email, name="User", token="dummy-token"):
     try:
-        link = f"http://localhost:8000/verify/{token}"
+        # Automatically detects if running on Render cloud, otherwise fall back to production URL
+        base_url = os.getenv("RENDER_EXTERNAL_URL", "https://tech-talk-ai.onrender.com")
+        link = f"{base_url}/verify/{token}"
 
         html = f"""
         <div style="font-family: Arial, sans-serif; background-color: #0b0f19; color: #ffffff; padding: 40px; text-align: center; border-radius: 10px;">
