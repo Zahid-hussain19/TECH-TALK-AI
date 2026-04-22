@@ -68,7 +68,7 @@ Full interactive docs: https://tech-talk-ai.onrender.com/docs
 ```bash
 cd backend/ai_engine
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --reload 
 ```
 
 ### Frontend
@@ -81,26 +81,7 @@ npm start
 
 ---
 
-## Environment Variables
 
-### Backend (`backend/ai_engine/.env`)
-
-```
-GROQ_API_KEY        = your_groq_api_key
-DATABASE_URL        = postgresql://user:password@host/dbname
-SECRET_KEY          = your_secret_key
-EMAIL_USER          = your_email@gmail.com
-EMAIL_PASSWORD      = your_email_app_password
-```
-
-### Frontend (`frontend/.env`)
-
-```
-REACT_APP_API_URL               = https://tech-talk-ai.onrender.com
-REACT_APP_FIREBASE_API_KEY      = your_firebase_api_key
-REACT_APP_FIREBASE_AUTH_DOMAIN  = your_project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID   = your_project_id
-```
 
 ---
 
